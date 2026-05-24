@@ -1,0 +1,31 @@
+[project]
+name = "medical-ai-qa"
+version = "1.0.0"
+description = "医疗AI智能客服 — 合规医疗知识问答系统"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.31.0",
+    "mysql-connector-python>=9.0.0",
+    "requests>=2.32.3",
+    "python-dotenv>=1.0.1",
+    "pydantic>=2.8.2",
+    "langchain>=0.2.14",
+    "sentence-transformers>=3.0.1",
+    "faiss-cpu>=1.8.0",
+    "beautifulsoup4>=4.12.3",
+    "cryptography>=42.0.8",
+    "PyJWT>=2.8.0",
+]
+
+[project.optional-dependencies]
+admin = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.31.0",
+    "mysql-connector-python>=9.0.0",
+    "PyJWT>=2.8.0",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["backend*", "admin*", "shared*"]
