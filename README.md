@@ -24,8 +24,8 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/keykey6/AI-health.git
-cd AI-health
+git clone https://github.com/keykey6/Medical-AI.git
+cd Medical-AI
 
 # 2. 配置环境变量
 cp .env.example .env
@@ -51,7 +51,7 @@ python start.py
 ## 项目结构
 
 ```
-AI-health/
+Medical-AI/
 ├── backend/           # 主 API 服务（FastAPI + RAG）
 │   ├── api/           # 路由层
 │   ├── core/          # 日志、异常中间件
