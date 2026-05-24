@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#f7f5f0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>登录 — Noir Medical</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold-400: #d4a855;
+      --gold-500: #c99533;
+      --gold-600: #b07d24;
+      --gold-700: #8f631a;
+      --gold-100: #f7edda;
+      --gold-50: #fdf8f0;
+      --teal-500: #14b8a0;
+      --rose-400: #fb7185;
+      --bg-root: #f7f5f0;
+      --bg-layer-1: #fefdfb;
+      --bg-layer-2: #f5f1e8;
+      --bg-layer-3: #ede6d8;
+      --bg-input: #f5f1e8;
+      --text-primary: #1c1915;
+      --text-secondary: #6b5e4f;
+      --text-muted: #9d8f7e;
+      --text-accent: #b07d24;
+      --border-subtle: rgba(0, 0, 0, 0.04);
+      --border-default: rgba(0, 0, 0, 0.07);
+      --border-strong: rgba(0, 0, 0, 0.12);
+      --border-gold: rgba(176, 125, 36, 0.25);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.1);
+      --shadow-glow-gold: 0 0 0 1px rgba(176, 125, 36, 0.2), 0 0 20px rgba(176, 125, 36, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --font-display: 'Playfair Display', 'Noto Serif SC', 'STSong', 'SimSun', 'Georgia', serif;
+      --font-body: 'DM Sans', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+      --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+      --dur-base: 250ms;
+      --dur-slow: 500ms;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-root);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: static !important;
+      overflow-y: auto !important;
+      height: auto !important;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background — matches main page light theme */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(176, 125, 36, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 0% 100%, rgba(20, 184, 160, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      background: var(--bg-layer-1);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-default);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 420px;
+      padding: 45px 35px;
+      animation: fadeInUp 0.5s var(--ease-out-expo);
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .logo-icon {
+      width: 70px; height: 70px;
+      background: linear-gradient(135deg, var(--gold-400), var(--gold-600));
+      border-radius: 16px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1206;
+      font-size: 32px;
+      box-shadow: 0 8px 25px rgba(201, 149, 51, 0.3);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      text-align: center;
+      color: var(--text-primary);
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--font-body);
+      transition: all var(--dur-base) var(--ease-out-expo);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--gold-400);
+      background: var(--bg-layer-1);
+      box-shadow: var(--shadow-glow-gold);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+      color: #1a1206;
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all var(--dur-base) var(--ease-out-expo);
+      margin-top: 12px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 16px rgba(201, 149, 51, 0.3);
+    }
+
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201, 149, 51, 0.45);
+    }
+
+    .btn-login:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 22px;
+      font-size: 14px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(244, 63, 94, 0.06);
+      color: #be123c;
+      border: 1px solid rgba(244, 63, 94, 0.15);
+      animation: shake 0.4s ease-in-out;
+    }
+
+    .message.success {
+      display: block;
+      background: var(--gold-50);
+      color: var(--gold-700);
+      border: 1px solid var(--border-gold);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .links a {
+      color: var(--text-accent);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0 12px;
+      transition: all 0.2s;
+    }
+
+    .links a:hover {
+      color: var(--gold-600);
+      text-decoration: underline;
+    }
+
+    .debug-toggle {
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .debug-toggle button {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-muted);
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .debug-toggle button:hover {
+      background: var(--bg-layer-2);
+      border-color: var(--gold-400);
+      color: var(--text-accent);
+    }
+
+    .debug-info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #1a202c;
+      border-radius: 10px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 11px;
+      color: #68d391;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .debug-info::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .debug-info::-webkit-scrollbar-track {
+      background: #2d3748;
+      border-radius: 3px;
+    }
+
+    .debug-info::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      border-radius: 3px;
+    }
+
+    /* 移动端优化 */
+    @media (max-width: 480px) {
+      body { padding: 15px; }
+      .container { padding: 35px 25px; border-radius: var(--radius-md); }
+      h1 { font-size: 23px; }
+      .logo-icon { width: 60px; height: 60px; font-size: 28px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">❤️‍⚕️</div>
+    <h1>医疗健康助手</h1>
+    <p class="subtitle">Noir Medical · 智能诊疗平台</p>
+  </div>
+
+  <div id="msg" class="message"></div>
+
+  <form id="loginForm" onsubmit="return handleLogin(event)">
+    <div class="form-group">
+      <label>👤 用户名</label>
+      <input type="text" id="username" placeholder="请输入用户名" required autocomplete="username" autofocus>
+    </div>
+
+    <div class="form-group">
+      <label>🔒 密码</label>
+      <input type="password" id="password" placeholder="请输入密码" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" class="btn-login" id="btnLogin">🔐 安全登录</button>
+  </form>
+
+  <div class="links">
+    <a href="/static/index.html">← 返回首页</a>
+    <a href="/static/diagnose.html">🔍 网络诊断</a>
+  </div>
+
+  <div class="debug-toggle">
+    <button onclick="toggleDebug()">📋 调试日志</button>
+  </div>
+
+  <div id="debug" class="debug-info"></div>
+</div>
+
+<script>
+// ========== 完全独立的登录逻辑（零依赖）==========
+
+var debugVisible = false;
+
+function toggleDebug() {
+  debugVisible = !debugVisible;
+  document.getElementById('debug').style.display = debugVisible ? 'block' : 'none';
+}
+
+function log(msg) {
+  var d = document.getElementById('debug');
+  if (d) {
+    d.style.display = 'block';
+    debugVisible = true;
+    var time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+    d.textContent += '[' + time + '] ' + msg + '\n';
+    d.scrollTop = d.scrollHeight;
+  }
+  console.log('[Login]', msg);
+}
+
+function showError(msg) {
+  var el = document.getElementById('msg');
+  el.className = 'message error';
+  el.innerHTML = '❌ ' + msg.replace(/\n/g, '<br>');
+}
+
+function showSuccess(msg) {
+  var el = document.getElementById('msg');
+  el.className = 'message success';
+  el.innerHTML = '✅ ' + msg;
+}
+
+function clearMsg() {
+  var el = document.getElementById('msg');
+  el.className = 'message';
+  el.textContent = '';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  clearMsg();
+
+  var username = document.getElementById('username').value.trim();
+  var password = document.getElementById('password').value;
+  var btn = document.getElementById('btnLogin');
+
+  if (!username || !password) {
+    showError('请输入用户名和密码');
+    return false;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 正在登录...';
+
+  log('═══ 开始登录流程 ═══');
+  log('用户名: ' + username);
+  log('当前页面: ' + window.location.href);
+
+  try {
+    var sessionId = localStorage.getItem('sessionId') ||
+      ('s_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8));
+    log('SessionID: ' + sessionId);
+
+    var apiUrl = '/api/auth/login';
+    log('API端点: ' + apiUrl);
+    log('完整URL: ' + window.location.origin + apiUrl);
+
+    log('发送请求...');
+    var startTime = performance.now();
+
+    var response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        session_id: sessionId
+      })
+    });
+
+    var elapsed = Math.round(performance.now() - startTime);
+    log('响应时间: ' + elapsed + 'ms');
+    log('HTTP状态: ' + response.status + ' ' + response.statusText);
+
+    if (!response.ok) {
+      var errorText = await response.text().catch(() => '');
+      log('错误内容: ' + errorText.substring(0, 200));
+
+      var errorMsg = '登录失败';
+      try {
+        var errData = JSON.parse(errorText);
+        errorMsg = errData.detail || errorMsg;
+      } catch (parseErr) {
+        errorMsg = '服务器错误 (' + response.status + ')';
+      }
+      throw new Error(errorMsg);
+    }
+
+    var data = await response.json();
+    log('✅ 登录成功！');
+    log('用户: ' + (data.username || username));
+    log('Token长度: ' + (data.token ? data.token.length : 0));
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('username', data.username || username);
+    localStorage.setItem('sessionId', sessionId);
+
+    log('Token已保存');
+
+    showSuccess('✓ 登录成功！正在跳转...');
+
+    setTimeout(function() {
+      log('跳转到主页...');
+      window.location.href = '/static/index.html';
+    }, 800);
+
+  } catch (error) {
+    log('❌ 错误: ' + error.message);
+
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      showError('网络连接失败<br><br>可能原因：<br>1️⃣ 后端服务未启动<br>2️⃣ 网络连接异常<br>3️⃣ 防火墙阻止<br><br>💡 建议：<a href="/static/diagnose.html" style="color:#c53030;font-weight:bold;text-decoration:underline;">运行诊断工具</a>');
+    } else if (error.message.includes('401') || error.message.includes('用户名') || error.message.includes('密码')) {
+      showError('❌ 用户名或密码错误');
+    } else if (error.message.includes('404')) {
+      showError('❌ 登录接口不存在<br>后端服务可能未正确启动');
+    } else {
+      showError('❌ ' + error.message);
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔐 安全登录';
+  }
+
+  return false;
+}
+
+// 页面初始化
+log('═══ 页面加载完成 ═══');
+log('时间: ' + new Date().toLocaleString('zh-CN'));
+log('支持LocalStorage: ' + !!window.localStorage);
+log('支持Fetch API: ' + !!window.fetch);
+log('在线状态: ' + (navigator.onLine ? '在线' : '离线'));
+
+var existingToken = localStorage.getItem('token');
+if (existingToken) {
+  log('发现已有Token (长度:' + existingToken.length + ')');
+  showSuccess('检测到已登录状态<br>可直接 <a href="/static/index.html" style="color:#276749;font-weight:bold;text-decoration:underline;">进入主页 →</a>');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 — 医疗AI智能客服</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-root: #F9F6F0;
+      --bg-layer-1: #FFFFFF;
+      --bg-input: #FAF8F4;
+      --text-primary: #2C2416;
+      --text-secondary: #5C5346;
+      --text-muted: #8A8276;
+      --gold-400: #B88626;
+      --gold-500: #A0751E;
+      --gold-600: #8A6318;
+      --rose-400: #E11D48;
+      --border-subtle: rgba(140,120,90,0.10);
+      --border-default: rgba(140,120,90,0.18);
+      --radius-sm: 8px;
+      --radius-lg: 20px;
+      --shadow-glow-gold: 0 0 0 3px rgba(184,134,38,0.10);
+      --font-display: 'Playfair Display', 'Noto Serif SC', STSong, serif;
+      --font-body: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-root);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 25%, rgba(184,134,38,0.04) 0%, transparent 55%),
+        radial-gradient(ellipse at 30% 70%, rgba(13,148,136,0.03) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .login-card {
+      width: 400px;
+      background: var(--bg-layer-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 44px 40px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 20px 60px rgba(44,36,22,0.08), 0 1px 3px rgba(44,36,22,0.04);
+    }
+    .login-header { text-align: center; margin-bottom: 32px; }
+    .login-header .icon { font-size: 38px; color: var(--gold-400); margin-bottom: 14px; }
+    .login-header h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: 0.02em;
+    }
+    .login-header p { font-size: 13.5px; color: var(--text-muted); }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--gold-400);
+      box-shadow: var(--shadow-glow-gold);
+      background: var(--bg-layer-1);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(184,134,38,0.25);
+      letter-spacing: 0.02em;
+    }
+    .btn-login:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(184,134,38,0.35); }
+    .btn-login:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .error-msg { text-align: center; color: var(--rose-400); font-size: 13px; margin-top: 14px; display: none; }
+    .back-link { text-align: center; margin-top: 22px; font-size: 13px; }
+    .back-link a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .back-link a:hover { color: var(--gold-500); }
+  </style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-header">
+    <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h1>管理后台</h1>
+    <p>医疗AI智能客服系统</p>
+  </div>
+  <form id="loginForm" onsubmit="return handleLogin(event)">
+    <div class="form-group">
+      <label class="form-label">管理员账号</label>
+      <input class="form-input" id="username" placeholder="输入管理员账号" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">密码</label>
+      <input class="form-input" id="password" type="password" placeholder="输入密码">
+    </div>
+    <button class="btn-login" type="submit" id="loginBtn">登 录</button>
+  </form>
+  <div class="error-msg" id="errorMsg"></div>
+  <div class="back-link">
+    <a href="http://localhost:8000/static/index.html">&larr; 返回主应用</a>
+  </div>
+</div>
+
+<script>
+var ADMIN_BASE = '';
+
+async function adminApi(url, method, data) {
+  var headers = { 'Content-Type': 'application/json' };
+  var token = localStorage.getItem('admin_token');
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  var opts = { method: method, headers: headers };
+  if (data) opts.body = JSON.stringify(data);
+  var r = await fetch(ADMIN_BASE + '/admin/api' + url, opts);
+  var json = await r.json();
+  if (!r.ok || json.code !== 200) throw new Error(json.detail || json.code || 'Request failed');
+  return json.data;
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  var btn = document.getElementById('loginBtn');
+  var err = document.getElementById('errorMsg');
+  btn.disabled = true; err.style.display = 'none';
+
+  try {
+    var data = await adminApi('/login', 'POST', {
+      username: document.getElementById('username').value.trim(),
+      password: document.getElementById('password').value
+    });
+    localStorage.setItem('admin_token', data.token);
+    localStorage.setItem('admin_username', data.username);
+    window.location.href = '/admin/admin.html';
+  } catch (ex) {
+    err.textContent = ex.message || '登录失败';
+    err.style.display = 'block';
+    btn.disabled = false;
+  }
+  return false;
+}
+
+if (localStorage.getItem('admin_token')) {
+  window.location.href = '/admin/admin.html';
+}
+</script>
+</body>
+</html>

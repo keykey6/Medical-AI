@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>登录 — Noir Medical</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/common.css">
+  <style>
+    /* 登录页面允许滚动 */
+    body {
+      position: static !important;
+      overflow-y: auto !important;
+      height: auto !important;
+    }
+    .auth-page {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+    }
+    .auth-card {
+      background: var(--bg-layer-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-md);
+      animation: fadeInScale var(--dur-slow) var(--ease-spring);
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .auth-logo {
+      text-align: center; margin-bottom: 32px;
+    }
+    .auth-logo .brand-icon {
+      width: 56px; height: 56px; margin: 0 auto 12px;
+      background: linear-gradient(135deg, var(--gold-400), var(--gold-600));
+      border-radius: var(--radius-md); color: #1a1206;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .auth-logo h1 {
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 600; color: var(--text-primary);
+      letter-spacing: 0.03em;
+    }
+    .auth-logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    .auth-tabs {
+      display: flex; gap: 2px;
+      background: var(--bg-layer-2);
+      border-radius: var(--radius-full); padding: 4px;
+      margin-bottom: 24px;
+    }
+    .auth-tab {
+      flex: 1; padding: 9px 0; border: none;
+      background: transparent; color: var(--text-secondary);
+      border-radius: var(--radius-full); cursor: pointer;
+      font-size: 13px; font-weight: 500; font-family: var(--font-body);
+      transition: all var(--dur-base) var(--ease-out-expo);
+    }
+    .auth-tab:hover { color: var(--text-primary); }
+    .auth-tab.active {
+      background: var(--bg-layer-3); color: var(--text-accent);
+      font-weight: 600; box-shadow: var(--shadow-sm);
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+    .auth-form label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.02em; text-transform: uppercase; }
+    .auth-form .form-input { font-size: 14px; padding: 11px 16px; }
+
+    .auth-btn {
+      width: 100%; padding: 12px; border: none;
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+      color: #1a1206; border-radius: var(--radius-full);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: var(--font-body);
+      box-shadow: 0 4px 16px rgba(201, 149, 51, 0.3);
+      transition: all var(--dur-base) var(--ease-out-expo);
+      margin-top: 6px;
+    }
+    .auth-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201, 149, 51, 0.45); }
+    .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .auth-error {
+      background: rgba(244, 63, 94, 0.08); color: var(--rose-400);
+      padding: 10px 16px; border-radius: var(--radius-sm);
+      font-size: 13px; display: none; text-align: center;
+      border: 1px solid rgba(244, 63, 94, 0.2);
+    }
+    .auth-success {
+      background: rgba(20, 184, 160, 0.08); color: var(--teal-400);
+      padding: 10px 16px; border-radius: var(--radius-sm);
+      font-size: 13px; display: none; text-align: center;
+      border: 1px solid rgba(20, 184, 160, 0.2);
+    }
+
+    .guest-section {
+      text-align: center; margin-top: 24px;
+      padding-top: 20px; border-top: 1px solid var(--border-subtle);
+    }
+    .guest-section p { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+    .guest-btn {
+      padding: 10px 28px; border: 1px solid var(--border-strong);
+      background: transparent; color: var(--text-primary);
+      border-radius: var(--radius-full); cursor: pointer;
+      font-size: 13px; font-weight: 500; font-family: var(--font-body);
+      transition: all var(--dur-base) var(--ease-out-expo);
+    }
+    .guest-btn:hover { border-color: var(--gold-400); color: var(--text-accent); box-shadow: var(--shadow-glow-gold); }
+
+    .back-link {
+      text-align: center; margin-top: 16px;
+    }
+    .back-link a { color: var(--text-muted); font-size: 13px; text-decoration: none; transition: color var(--dur-fast) var(--ease-out-expo); }
+    .back-link a:hover { color: var(--text-accent); }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="brand-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+      <h1>医疗健康助手</h1>
+      <p>Noir Medical</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">登录</button>
+      <button class="auth-tab" onclick="switchTab('register')">注册</button>
+    </div>
+
+    <div id="errorMsg" class="auth-error"></div>
+    <div id="successMsg" class="auth-success"></div>
+
+    <!-- Login form -->
+    <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+      <label>用户名</label>
+      <input class="form-input" id="loginUsername" placeholder="请输入用户名" autocomplete="username" required>
+      <label>密码</label>
+      <input class="form-input" type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password" required>
+      <button class="auth-btn" type="submit" id="loginBtn">
+        <i class="fa-solid fa-key"></i> 登录
+      </button>
+    </form>
+
+    <!-- Register form (hidden by default) -->
+    <form id="registerForm" class="auth-form" style="display:none" onsubmit="handleRegister(event)">
+      <label>用户名</label>
+      <input class="form-input" id="regUsername" placeholder="至少2个字符" autocomplete="username" required>
+      <label>密码</label>
+      <input class="form-input" type="password" id="regPassword" placeholder="至少4个字符" autocomplete="new-password" required>
+      <label>确认密码</label>
+      <input class="form-input" type="password" id="regPassword2" placeholder="再次输入密码" autocomplete="new-password" required>
+      <button class="auth-btn" type="submit" id="regBtn">
+        <i class="fa-solid fa-user-plus"></i> 注册
+      </button>
+    </form>
+
+    <!-- Guest -->
+    <div class="guest-section">
+      <p>无需注册，快速体验</p>
+      <button class="guest-btn" onclick="enterAsGuest()">
+        <i class="fa-solid fa-ghost"></i> 游客模式进入
+      </button>
+    </div>
+
+    <div class="back-link">
+      <a href="/static/index.html"><i class="fa-solid fa-arrow-left"></i> 返回首页</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="/static/js/common.js"></script>
+<script>
+  // Standalone auth helpers (fallback in case common.js cache issue)
+  if (typeof setToken === 'undefined') {
+    window.setToken = function(t) { localStorage.setItem('token', t); };
+  }
+  if (typeof setUserName === 'undefined') {
+    window.setUserName = function(n) { if (n) localStorage.setItem('username', n); else localStorage.removeItem('username'); };
+  }
+  if (typeof getSessionId === 'undefined') {
+    window.getSessionId = function() {
+      var id = localStorage.getItem('sessionId');
+      if (!id) { id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); localStorage.setItem('sessionId', id); }
+      return id;
+    };
+  }
+  if (typeof getToken === 'undefined') {
+    window.getToken = function() { return localStorage.getItem('token') || ''; };
+  }
+
+  let currentTab = 'login';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.auth-tab').forEach(function (t) {
+      t.classList.toggle('active', t.textContent.trim() === (tab === 'login' ? '登录' : '注册'));
+    });
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'flex' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
+    hideMessages();
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('errorMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+
+  function showSuccess(msg) {
+    var el = document.getElementById('successMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+
+  function hideMessages() {
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault(); hideMessages();
+    var username = document.getElementById('loginUsername').value.trim();
+    var password = document.getElementById('loginPassword').value;
+    var sessionId = getSessionId();
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 登录中...';
+
+    try {
+      var r = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password, session_id: sessionId }),
+      });
+      var data = await r.json();
+      if (!r.ok) throw new Error(data.detail || '登录失败');
+
+      setToken(data.token);
+      setUserName(data.username);
+      showSuccess('登录成功，正在跳转...');
+      setTimeout(function () { window.location.href = '/static/index.html'; }, 800);
+    } catch (err) {
+      showError(err.message);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-key"></i> 登录';
+    }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault(); hideMessages();
+    var username = document.getElementById('regUsername').value.trim();
+    var password = document.getElementById('regPassword').value;
+    var password2 = document.getElementById('regPassword2').value;
+    var btn = document.getElementById('regBtn');
+
+    if (password !== password2) { showError('两次密码不一致'); return; }
+    if (username.length < 2) { showError('用户名至少2个字符'); return; }
+    if (password.length < 4) { showError('密码至少4个字符'); return; }
+
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 注册中...';
+
+    try {
+      var r = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password }),
+      });
+      var data = await r.json();
+      if (!r.ok) throw new Error(data.detail || '注册失败');
+
+      showSuccess('注册成功！请切换到登录面板登录。');
+      document.getElementById('regUsername').value = '';
+      document.getElementById('regPassword').value = '';
+      document.getElementById('regPassword2').value = '';
+      setTimeout(function () { switchTab('login'); }, 1500);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> 注册';
+    }
+  }
+
+  async function enterAsGuest() {
+    var sessionId = getSessionId();
+    try {
+      await fetch('/api/auth/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+    } catch (e) { /* proceed even if guest API fails */ }
+
+    clearToken();
+    setUserName('');
+    window.location.href = '/static/index.html';
+  }
+</script>
+</body>
+</html>

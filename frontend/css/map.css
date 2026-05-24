@@ -1,0 +1,256 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Noir Medical — Hospital Map Page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.map-layout {
+  display: flex;
+  height: calc(100vh - 56px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sidebar
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 380px;
+  background: var(--bg-layer-1);
+  border-right: 1px solid var(--border-subtle);
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px;
+  flex-shrink: 0;
+}
+
+/* Section blocks */
+.section-block {
+  background: var(--bg-layer-2);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  border: 1px solid var(--border-subtle);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-accent);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* Location row */
+.location-row { display: flex; align-items: center; gap: 12px; }
+.location-info { flex: 1; }
+.location-label {
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 3px;
+  letter-spacing: 0.03em; text-transform: uppercase;
+}
+#locationText { font-size: 13px; color: var(--text-primary); }
+
+.btn-locate {
+  background: var(--bg-layer-3);
+  color: var(--text-accent);
+  border: 1px solid var(--border-gold);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--dur-base) var(--ease-out-expo);
+}
+
+.btn-locate:hover {
+  background: rgba(212, 168, 85, 0.12);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* Filters */
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  background: var(--bg-layer-1);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  min-width: 95px;
+  outline: none;
+  transition: all var(--dur-fast) var(--ease-out-expo);
+}
+
+.filter-select:focus {
+  border-color: var(--gold-400);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.search-row { display: flex; gap: 8px; }
+
+.search-input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--bg-layer-1);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  outline: none;
+  transition: all var(--dur-fast) var(--ease-out-expo);
+}
+
+.search-input:focus {
+  border-color: var(--gold-400);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.btn-search {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+  color: #1a1206;
+  border: none;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--dur-base) var(--ease-out-expo);
+  box-shadow: 0 4px 12px rgba(201, 149, 51, 0.2);
+}
+
+.btn-search:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(201, 149, 51, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Hospital List
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hospital-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 400px; overflow-y: auto;
+}
+
+.hospital-item {
+  background: var(--bg-layer-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all var(--dur-base) var(--ease-out-expo);
+}
+
+.hospital-item:hover {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.hospital-item.active {
+  border-color: var(--gold-400);
+  background: rgba(212, 168, 85, 0.08);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.hosp-name {
+  font-weight: 600; font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.hosp-addr { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+
+.hosp-tags { display: flex; gap: 5px; }
+
+.hosp-tag {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.ht-level {
+  background: rgba(212, 168, 85, 0.1);
+  color: var(--gold-400);
+  border: 1px solid rgba(212, 168, 85, 0.15);
+}
+
+.ht-dist {
+  background: rgba(20, 184, 160, 0.1);
+  color: var(--teal-400);
+  border: 1px solid rgba(20, 184, 160, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Map Area
+   ═══════════════════════════════════════════════════════════════════════════ */
+.map-area {
+  flex: 1;
+  position: relative;
+  background: var(--bg-root);
+  margin: 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+#mapContainer {
+  width: 100%; height: 100%;
+}
+
+/* Map legend */
+.map-legend {
+  position: absolute; bottom: 14px; left: 14px;
+  background: var(--bg-layer-1);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  display: flex; align-items: center; gap: 16px;
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.legend-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle; margin-right: 5px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+}
+
+.legend-user { background: var(--teal-400); }
+.legend-hosp { background: var(--gold-400); }
+
+/* Map disclaimer */
+.map-disclaimer {
+  position: absolute; bottom: 14px; right: 14px;
+  max-width: 270px;
+  background: var(--bg-layer-1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-accent);
+  border: 1px solid var(--border-gold);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .map-layout { flex-direction: column; }
+  .sidebar {
+    width: 100%; max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .map-area { height: 55vh; margin: 0; border-radius: 0; }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>报告解读 — Noir Medical</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/report.css">
+  <style>
+    /* 报告解读页面允许滚动 */
+    body {
+      position: static !important;
+      overflow-y: auto !important;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon"><i class="fa-solid fa-file-medical"></i></div>
+    报告解读
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" style="color:white;background:rgba(255,255,255,0.12)" onclick="location.href='index.html'">
+      <i class="fa-solid fa-arrow-left"></i> 返回对话
+    </button>
+    <button class="btn-icon" onclick="toggleTheme()" title="切换主题">
+      <i class="fa-solid fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+</div>
+
+<div class="container page-layout">
+  <div class="disclaimer">
+    <i class="fa-solid fa-circle-exclamation" style="margin-top:2px"></i>
+    <span>本功能仅对报告内容进行客观转录和整理，不进行任何医学诊断、分析或评估。请勿自行解读或根据网络信息做出健康决策。</span>
+  </div>
+
+  <!-- Report type selector -->
+  <div class="card">
+    <div class="card-header"><i class="fa-solid fa-list-check"></i>选择报告类型</div>
+    <div class="card-body">
+      <div id="typeGrid" class="type-grid"></div>
+      <div class="quick-types">
+        <span style="font-size:13px;color:var(--text-secondary);font-weight:500;align-self:center">快速选择：</span>
+        <button class="type-btn" onclick="selectQuickType('血常规')">血常规</button>
+        <button class="type-btn" onclick="selectQuickType('尿常规')">尿常规</button>
+        <button class="type-btn" onclick="selectQuickType('肝功能')">肝功能</button>
+        <button class="type-btn" onclick="selectQuickType('肾功能')">肾功能</button>
+        <button class="type-btn" onclick="selectQuickType('心电图')">心电图</button>
+        <button class="type-btn" onclick="selectQuickType('血脂')">血脂</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload area -->
+  <div class="card">
+    <div class="card-header"><i class="fa-solid fa-cloud-arrow-up"></i>上传报告图片</div>
+    <div class="card-body">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <i class="fa-solid fa-file-image"></i>
+        <p>点击此处或拖拽文件上传报告图片</p>
+        <p class="hint">支持JPG、PNG、GIF、BMP、WebP格式，大小不超过15MB</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="handleFileSelect(event)">
+      <div class="upload-preview" id="uploadPreview">
+        <img id="previewImg" src="" alt="预览">
+        <div class="preview-actions">
+          <button class="btn btn-outline" onclick="clearUpload()">重新选择</button>
+          <button class="btn btn-primary" id="analyzeBtn" onclick="submitAnalysis()">
+            <i class="fa-solid fa-magnifying-glass"></i> 开始解读
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-block" id="loadingBlock">
+    <div class="spinner" style="margin:0 auto"></div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-top:12px">正在识别报告并生成解读，请稍候...</p>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <i class="fa-solid fa-file-lines"></i> 解读结果
+      <span class="compliance-badge"><i class="fa-solid fa-shield-check"></i> 合规</span>
+    </div>
+    <div class="result-body" id="resultBody"></div>
+  </div>
+
+  <!-- Follow-up -->
+  <div class="card followup-card" id="followupCard" style="display:none">
+    <div class="card-header"><i class="fa-solid fa-comments"></i>继续提问</div>
+    <div class="card-body">
+      <div class="followup-bar">
+        <input type="text" class="followup-input" id="followupInput"
+               placeholder="关于这份报告，您还有什么问题？..."
+               onkeydown="handleFollowupKey(event)">
+        <button class="btn btn-primary btn-sm" id="followupBtn" onclick="sendFollowup()" style="padding:8px 18px;margin:3px">
+          <i class="fa-solid fa-paper-plane"></i> 发送
+        </button>
+      </div>
+      <div id="followupResult" class="followup-result"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-ghost" style="margin:0 auto;display:flex" onclick="resetPage()">
+    <i class="fa-solid fa-rotate-right"></i> 解读新报告
+  </button>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-header"><i class="fa-solid fa-clock-rotate-left"></i>历史解读记录</div>
+    <div class="card-body">
+      <div id="historyList" class="history-list">
+        <div class="empty-state"><i class="fa-solid fa-inbox empty-icon"></i><p>暂无解读记录</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>解读详情</h3>
+      <button class="modal-close" onclick="closeDetailModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="detailContent" style="font-size:14px;color:var(--text-primary);line-height:1.8;white-space:pre-wrap;"></div>
+  </div>
+</div>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/report.js"></script>
+<script>
+  // Result card display hook
+  const origSubmit = submitAnalysis;
+  submitAnalysis = async function() {
+    await origSubmit();
+    // Show followup card when result appears
+    if (document.getElementById('resultCard').style.display !== 'none') {
+      document.getElementById('followupCard').style.display = 'block';
+    }
+  };
+  const origReset = resetPage;
+  resetPage = function() {
+    origReset();
+    document.getElementById('followupCard').style.display = 'none';
+  };
+</script>
+</body>
+</html>

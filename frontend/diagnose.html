@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API连接诊断 - Noir Medical</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: #e4e7eb;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #d4a853; font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #d4a853; padding-bottom: 10px; }
+    h2 { color: #8892a4; font-size: 18px; margin: 25px 0 15px; }
+    .test-item {
+      background: #141927;
+      border: 1px solid #2a3447;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .test-name { font-weight: 600; color: #fff; }
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .status.pending { background: #374151; color: #9ca3af; }
+    .status.success { background: #065f46; color: #6ee7b7; }
+    .status.error { background: #7f1d1d; color: #fca5a5; }
+    .status.loading { background: #1e40af; color: #93c5fd; animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.5; } }
+    .details {
+      background: #0d1117;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #8b949e;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .btn {
+      background: linear-gradient(135deg, #d4a853, #b8942f);
+      color: #1a1206;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 10px 5px 10px 0;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,83,0.3); }
+    .btn-secondary { background: #374151; color: #e4e7eb; }
+    .summary {
+      background: linear-gradient(135deg, #1a1f2e, #141927);
+      border: 2px solid #2a3447;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+    .summary h3 { color: #d4a853; margin-bottom: 15px; }
+    .issue-list { list-style: none; }
+    .issue-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #2a3447;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .issue-list li:last-child { border-bottom: none; }
+    .icon { font-size: 18px; }
+    .version { float: right; color: #6b7280; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🔍 API 连接诊断工具 <span class="version">v2.0 - 独立测试</span></h1>
+
+  <div style="margin-bottom: 20px;">
+    <button class="btn" onclick="runAllTests()">▶ 运行全部诊断</button>
+    <button class="btn btn-secondary" onclick="clearResults()">🗑️ 清除结果</button>
+    <button class="btn btn-secondary" onclick="window.location.href='/static/login.html'">🔐 返回登录页</button>
+  </div>
+
+  <h2>📊 环境信息</h2>
+  <div class="test-item" id="envInfo">
+    <div class="details" id="envDetails">正在检测...</div>
+  </div>
+
+  <h2>🌐 网络连通性测试</h2>
+
+  <div class="test-item">
+    <div class="test-header">
+      <span class="test-name">1️⃣ 基础连接测试 (GET /)</span>
+      <span class="status pending" id="s1">待测试</span>
+    </div>
+    <div class="details" id="r1"></div>
+  </div>
+
+  <div class="test-item">
+    <div class="test-header">
+      <span class="test-name">2️⃣ 健康检查 (GET /health)</span>
+      <span class="status pending" id="s2">待测试</span>
+    </div>
+    <div class="details" id="r2"></div>
+  </div>
+
+  <div class="test-item">
+    <div class="test-header">
+      <span class="test-name">3️⃣ 登录接口测试 (POST /api/auth/login)</span>
+      <span class="status pending" id="s3">待测试</span>
+    </div>
+    <div class="details" id="r3"></div>
+  </div>
+
+  <div class="test-item">
+    <div class="test-header">
+      <span class="test-name">4️⃣ CORS 跨域测试</span>
+      <span class="status pending" id="s4">待测试</span>
+    </div>
+    <div class="details" id="r4"></div>
+  </div>
+
+  <div class="test-item">
+    <div class="test-header">
+      <span class="test-name">5️⃣ 会话创建测试 (POST /api/session/create)</span>
+      <span class="status pending" id="s5">待测试</span>
+    </div>
+    <div class="details" id="r5"></div>
+  </div>
+
+  <div class="summary" id="summary" style="display:none;">
+    <h3>📋 诊断总结</h3>
+    <ul class="issue-list" id="issues"></ul>
+  </div>
+</div>
+
+<script>
+var results = [];
+
+function log(id, msg) {
+  document.getElementById('r' + id).textContent += msg + '\n';
+}
+
+function setStatus(id, status, text) {
+  var el = document.getElementById('s' + id);
+  el.className = 'status ' + status;
+  el.textContent = text || status;
+}
+
+function detectEnv() {
+  var info = {
+    '当前页面URL': window.location.href,
+    'Origin': window.location.origin,
+    'Hostname': window.location.hostname,
+    'Protocol': window.location.protocol,
+    'Port': window.location.port || '(默认)',
+    'User Agent': navigator.userAgent.substring(0, 100) + '...',
+    '平台': navigator.platform,
+    '语言': navigator.language,
+    '在线状态': navigator.onLine ? '在线' : '离线',
+    'Cookie启用': navigator.cookieEnabled ? '是' : '否',
+    'LocalStorage支持': !!window.localStorage,
+    'Fetch API支持': !!window.fetch,
+  };
+
+  var text = '';
+  for (var k in info) {
+    text += k + ': ' + info[k] + '\n';
+  }
+  document.getElementById('envDetails').textContent = text;
+}
+
+async function testBasicConnection() {
+  setStatus(1, 'loading', '测试中...');
+  try {
+    var start = Date.now();
+    var r = await fetch('/', { method: 'GET' });
+    var elapsed = Date.now() - start;
+    var data = await r.json();
+
+    log(1, '✅ 连接成功！');
+    log(1, '状态码: ' + r.status);
+    log(1, '响应时间: ' + elapsed + 'ms');
+    log(1, '响应内容: ' + JSON.stringify(data));
+    setStatus(1, 'success', '成功 (' + elapsed + 'ms)');
+    results.push({ name: '基础连接', pass: true });
+  } catch (e) {
+    log(1, '❌ 连接失败！');
+    log(1, '错误类型: ' + e.name);
+    log(1, '错误消息: ' + e.message);
+    if (e.stack) log(1, '堆栈: ' + e.stack.split('\n').slice(0, 3).join('\n'));
+    setStatus(1, 'error', '失败');
+    results.push({ name: '基础连接', pass: false, error: e.message });
+  }
+}
+
+async function testHealthCheck() {
+  setStatus(2, 'loading', '测试中...');
+  try {
+    var start = Date.now();
+    var r = await fetch('/health');
+    var elapsed = Date.now() - start;
+    var data = await r.json();
+
+    log(2, '✅ 健康检查通过！');
+    log(2, '状态码: ' + r.status);
+    log(2, '响应时间: ' + elapsed + 'ms');
+    log(2, '响应内容: ' + JSON.stringify(data));
+    setStatus(2, 'success', '正常 (' + elapsed + 'ms)');
+    results.push({ name: '健康检查', pass: true });
+  } catch (e) {
+    log(2, '❌ 健康检查失败！');
+    log(2, '错误: ' + e.message);
+    setStatus(2, 'error', '异常');
+    results.push({ name: '健康检查', pass: false, error: e.message });
+  }
+}
+
+async function testLoginAPI() {
+  setStatus(3, 'loading', '测试中...');
+  try {
+    var start = Date.now();
+    var r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'test_user_' + Date.now(),
+        password: 'test_pass_123',
+        session_id: 'diag_' + Date.now()
+      }),
+    });
+    var elapsed = Date.now() - start;
+
+    log(3, '请求完成！耗时: ' + elapsed + 'ms');
+    log(3, '状态码: ' + r.status + ' ' + r.statusText);
+    log(3, '响应类型: ' + r.type);
+    log(3, 'OK状态: ' + r.ok);
+
+    var text = await r.text();
+    log(3, '响应内容: ' + text.substring(0, 500));
+
+    // 不管401还是200，只要能连上就算成功
+    if (r.status === 401) {
+      log(3, '\n✅ 接口可达！(401表示用户不存在，这是正常的)');
+      setStatus(3, 'success', '接口正常 (401)');
+      results.push({ name: '登录接口', pass: true });
+    } else if (r.ok) {
+      log(3, '\n✅ 登录成功！');
+      setStatus(3, 'success', '成功');
+      results.push({ name: '登录接口', pass: true });
+    } else {
+      log(3, '\n⚠️ 意外状态码');
+      setStatus(3, 'error', '异常 (' + r.status + ')');
+      results.push({ name: '登录接口', pass: false, error: 'HTTP ' + r.status });
+    }
+  } catch (e) {
+    log(3, '❌ 请求失败！');
+    log(3, '错误名称: ' + e.name);
+    log(3, '错误消息: ' + e.message);
+    if (e.stack) log(3, '堆栈:\n' + e.stack.split('\n').slice(0, 5).join('\n'));
+    setStatus(3, 'error', 'Failed to fetch');
+    results.push({ name: '登录接口', pass: false, error: e.message });
+  }
+}
+
+async function testCORS() {
+  setStatus(4, 'loading', '测试中...');
+  try {
+    var r = await fetch('/api/auth/me', {
+      method: 'GET',
+      headers: {
+        'Origin': window.location.origin,
+        'Authorization': 'Bearer invalid_token_for_test'
+      },
+    });
+
+    log(4, '请求完成');
+    log(4, '状态码: ' + r.status);
+
+    // 检查CORS头
+    var corsHeader = r.headers.get('Access-Control-Allow-Origin');
+    log(4, 'CORS Allow-Origin: ' + (corsHeader || '未设置'));
+
+    if (corsHeader === '*' || corsHeader === window.location.origin) {
+      log(4, '\n✅ CORS配置正确！');
+      setStatus(4, 'success', '正常');
+      results.push({ name: 'CORS跨域', pass: true });
+    } else if (corsHeader) {
+      log(4, '\n⚠️ CORS有限制: ' + corsHeader);
+      setStatus(4, 'error', '受限');
+      results.push({ name: 'CORS跨域', pass: false, error: 'CORS限制: ' + corsHeader });
+    } else {
+      log(4, '\n❌ 未检测到CORS头（可能被浏览器隐藏）');
+      setStatus(4, 'pending', '无法确定');
+      results.push({ name: 'CORS跨域', pass: null, note: '需要进一步检查' });
+    }
+  } catch (e) {
+    log(4, '❌ CORS测试失败: ' + e.message);
+    setStatus(4, 'error', '失败');
+    results.push({ name: 'CORS跨域', pass: false, error: e.message });
+  }
+}
+
+async function testSessionCreate() {
+  setStatus(5, 'loading', '测试中...');
+  try {
+    var r = await fetch('/api/session/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    log(5, '请求完成，状态: ' + r.status);
+
+    var text = await r.text();
+    log(5, '响应: ' + text.substring(0, 300));
+
+    if (r.ok || r.status === 401) {
+      log(5, '\n✅ 会话接口可达！');
+      setStatus(5, 'success', '正常');
+      results.push({ name: '会话创建', pass: true });
+    } else {
+      setStatus(5, 'error', '异常');
+      results.push({ name: '会话创建', pass: false, error: 'HTTP ' + r.status });
+    }
+  } catch (e) {
+    log(5, '❌ 失败: ' + e.message);
+    setStatus(5, 'error', '失败');
+    results.push({ name: '会话创建', pass: false, error: e.message });
+  }
+}
+
+function showSummary() {
+  var summary = document.getElementById('summary');
+  var issues = document.getElementById('issues');
+  issues.innerHTML = '';
+
+  var allPass = results.every(r => r.pass);
+  var hasFailure = results.some(r => r.pass === false);
+
+  if (allPass) {
+    issues.innerHTML = '<li><span class="icon">✅</span> 所有测试通过！系统运行正常。</li>';
+  } else {
+    results.forEach(function(r) {
+      if (!r.pass) {
+        issues.innerHTML += '<li><span class="icon">❌</span><strong>' + r.name + '</strong>: ' + (r.error || '未知错误') + '</li>';
+      }
+    });
+
+    // 添加建议
+    issues.innerHTML += '<li style="margin-top:15px;padding-top:15px;border-top:2px solid #d4a853;"><span class="icon">💡</span><strong>修复建议：</strong></li>';
+
+    var loginFailed = results.find(r => r.name === '登录接口' && !r.pass);
+    if (loginFailed && loginFailed.error.includes('Failed to fetch')) {
+      issues.innerHTML += '<li>1. 检查后端服务是否正常运行（终端5）</li>';
+      issues.innerHTML += '<li>2. 检查cpolar隧道是否连接（终端4）</li>';
+      issues.innerHTML += '<li>3. 尝试直接访问 http://localhost:8000 测试本地环境</li>';
+      issues.innerHTML += '<li>4. 检查防火墙或杀毒软件是否阻止了请求</li>';
+    }
+
+    var corsIssue = results.find(r => r.name === 'CORS跨域' && !r.pass);
+    if (corsIssue) {
+      issues.innerHTML += '<li>CORS问题：后端的allow_origins可能需要包含当前域名</li>';
+    }
+  }
+
+  summary.style.display = 'block';
+}
+
+async function runAllTests() {
+  clearResults();
+  detectEnv();
+
+  await testBasicConnection();
+  await new Promise(r => setTimeout(r, 300));
+
+  await testHealthCheck();
+  await new Promise(r => setTimeout(r, 300));
+
+  await testLoginAPI();
+  await new Promise(r => setTimeout(r, 300));
+
+  await testCORS();
+  await new Promise(r => setTimeout(r, 300));
+
+  await testSessionCreate();
+
+  showSummary();
+}
+
+function clearResults() {
+  results = [];
+  for (var i = 1; i <= 5; i++) {
+    document.getElementById('r' + i).textContent = '';
+    setStatus(i, 'pending', '待测试');
+  }
+  document.getElementById('summary').style.display = 'none';
+}
+
+// 页面加载时自动检测环境
+detectEnv();
+</script>
+</body>
+</html>

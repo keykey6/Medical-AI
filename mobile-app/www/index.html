@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>医疗健康助手 — Noir Medical</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/chat.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    /* 移动端主页面允许滚动 */
+    @media (max-width: 480px) {
+      body {
+        position: static !important;
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      .main-layout {
+        height: auto;
+        min-height: calc(100vh - 56px);
+      }
+      .main-area {
+        overflow-y: visible;
+      }
+      /* 聊天面板保持固定布局 */
+      #chatPanel {
+        min-height: calc(100vh - 56px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+    医疗健康助手
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab" data-tab="profile" onclick="switchPanel('profile')">
+      <i class="fa-solid fa-folder-open"></i> <span class="nav-text">档案</span>
+    </button>
+    <button class="nav-tab active" data-tab="chat" onclick="switchPanel('chat')">
+      <i class="fa-solid fa-comments"></i> <span class="nav-text">咨询</span>
+    </button>
+    <button class="nav-tab" data-tab="services" onclick="switchPanel('services')">
+      <i class="fa-solid fa-bars-staggered"></i> <span class="nav-text">服务</span>
+    </button>
+  </div>
+  <div class="topbar-actions">
+    <span id="authText" style="font-size:12px;color:var(--text-secondary);margin-right:4px">游客</span>
+    <button class="btn-icon" id="authBtn" title="登录">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i>
+    </button>
+    <button class="btn-icon" onclick="toggleTheme()" title="切换主题">
+      <i class="fa-solid fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- Session Sidebar -->
+  <aside class="session-sidebar" id="sessionSidebar">
+    <div class="sidebar-header">
+      <button class="btn btn-primary btn-sm" onclick="createNewSession()" style="width:100%">
+        <i class="fa-solid fa-plus"></i> 新建会话
+      </button>
+    </div>
+    <div class="session-list" id="sessionList">
+      <div class="empty-state" id="sessionEmpty">
+        <i class="fa-solid fa-comments empty-icon"></i>
+        <p id="sessionEmptyText">登录后查看历史会话</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main-area">
+
+<div class="container">
+
+  <!-- Profile Panel -->
+  <div class="panel" id="profilePanel">
+    <!-- Guest notice -->
+    <div id="profileAuthOverlay" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:rgba(212,168,85,0.06);border-radius:var(--radius-sm);border:1px solid var(--border-gold);margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-accent)">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>游客模式 · 档案仅当前会话有效</span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.location.href='/static/login.html'">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> 去登录
+      </button>
+    </div>
+    <div class="disclaimer">
+      <i class="fa-solid fa-shield-halved" style="margin-top:2px"></i>
+      <span>您的健康档案信息已加密存储，仅用于适配科普内容，不作任何诊断分析。</span>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-user"></i>个人健康档案</div>
+      <div class="card-body">
+        <div id="profileSummary" class="profile-summary">
+          <div class="empty-state">
+            <i class="fa-solid fa-file-medical empty-icon"></i>
+            <p>尚未填写健康档案</p>
+            <p style="font-size:12px">完善档案后可获得更贴合您情况的健康科普</p>
+          </div>
+        </div>
+        <div class="form-grid mt-md">
+          <div class="form-group"><span class="form-label">姓名</span><input class="form-input" id="pfName" placeholder="请输入姓名"></div>
+          <div class="form-group">
+            <span class="form-label">性别</span>
+            <select class="form-select" id="pfGender">
+              <option value="">请选择</option><option value="男">男</option><option value="女">女</option>
+            </select>
+          </div>
+          <div class="form-group"><span class="form-label">年龄</span><input class="form-input" type="number" id="pfAge" placeholder="请填写年龄" min="0" max="150"></div>
+          <div class="form-group"><span class="form-label">身高（厘米）</span><input class="form-input" type="number" id="pfHeight" placeholder="如 170" min="0" max="300"></div>
+          <div class="form-group"><span class="form-label">体重（公斤）</span><input class="form-input" type="number" id="pfWeight" placeholder="如 65" min="0" max="500"></div>
+          <div class="form-group full-width"><span class="form-label">过敏史</span><input class="form-input" id="pfAllergies" placeholder="如 青霉素过敏、花粉过敏"></div>
+          <div class="form-group full-width"><span class="form-label">既往疾病史</span><textarea class="form-input" id="pfDiseases" placeholder="如 高血压、糖尿病等（如有）" rows="2"></textarea></div>
+          <div class="form-group full-width"><span class="form-label">当前常用药物</span><input class="form-input" id="pfMedications" placeholder="如 降压药（可选填）"></div>
+          <div class="form-group full-width">
+            <button class="btn btn-primary" onclick="saveProfile()"><i class="fa-solid fa-save"></i>保存档案</button>
+            <button class="btn btn-outline" style="margin-left:10px" onclick="runHealthAssess()"><i class="fa-solid fa-chart-simple"></i>健康评估</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="assessCard" style="display:none">
+      <div class="card-header"><i class="fa-solid fa-clipboard-check"></i>健康评估结果</div>
+      <div class="card-body" id="assessResult" style="font-size:14px;line-height:1.8;white-space:pre-wrap;"></div>
+    </div>
+  </div>
+
+  <!-- Chat Panel -->
+  <div class="panel active" id="chatPanel">
+    <div class="disclaimer">
+      <i class="fa-solid fa-circle-info" style="margin-top:2px"></i>
+      <span>本服务仅供医疗科普参考，不构成诊断或治疗建议。如有不适，请及时就医。</span>
+    </div>
+
+    <!-- Quick questions -->
+    <div class="card" style="padding:12px 18px;">
+      <div style="font-weight:600;font-size:13px;color:var(--text-secondary);margin-bottom:10px">快捷提问</div>
+      <div class="question-chips">
+        <button class="question-chip" onclick="sendQuick('糖尿病有哪些症状？')">糖尿病有哪些症状？</button>
+        <button class="question-chip" onclick="sendQuick('如何预防胃酸反流？')">如何预防胃酸反流？</button>
+        <button class="question-chip" onclick="sendQuick('高血压注意事项')">高血压注意事项</button>
+        <button class="question-chip" onclick="sendQuick('健康饮食建议')">健康饮食建议</button>
+        <button class="question-chip" onclick="sendQuick('运动健康指南')">运动健康指南</button>
+        <button class="question-chip" onclick="sendQuick('失眠怎么办？')">失眠怎么办？</button>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="card" style="padding:12px 18px;">
+      <div style="font-weight:600;font-size:13px;color:var(--text-secondary);margin-bottom:10px">快捷功能</div>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="location.href='report.html'">
+          <div class="quick-icon qc-green"><i class="fa-solid fa-file-medical"></i></div>
+          <div class="quick-label">看报告</div><div class="quick-sub">化验单解读</div>
+        </div>
+        <div class="quick-card" onclick="openTcmModal()">
+          <div class="quick-icon qc-green"><i class="fa-solid fa-leaf"></i></div>
+          <div class="quick-label">看中医</div><div class="quick-sub">中医科普咨询</div>
+        </div>
+        <div class="quick-card" onclick="openFoodModal()">
+          <div class="quick-icon qc-amber"><i class="fa-solid fa-utensils"></i></div>
+          <div class="quick-label">拍食物</div><div class="quick-sub">食物分析建议</div>
+        </div>
+        <div class="quick-card" onclick="openMedicationModal()">
+          <div class="quick-icon qc-red"><i class="fa-solid fa-capsules"></i></div>
+          <div class="quick-label">查用药</div><div class="quick-sub">药品科普信息</div>
+        </div>
+      </div>
+      <div class="quick-grid mt-sm">
+        <div class="quick-card" onclick="openHospitalModal()">
+          <div class="quick-icon qc-blue"><i class="fa-solid fa-hospital"></i></div>
+          <div class="quick-label">找医院</div><div class="quick-sub">就医指引服务</div>
+        </div>
+        <div class="quick-card" onclick="openLifestyleModal('饮食')">
+          <div class="quick-icon qc-amber"><i class="fa-solid fa-apple-whole"></i></div>
+          <div class="quick-label">饮食建议 <span class="login-recommend" title="登录后可获得个性化建议"><i class="fa-solid fa-user-check"></i></span></div><div class="quick-sub">健康饮食科普</div>
+        </div>
+        <div class="quick-card" onclick="openLifestyleModal('运动')">
+          <div class="quick-icon qc-blue"><i class="fa-solid fa-person-running"></i></div>
+          <div class="quick-label">运动建议 <span class="login-recommend" title="登录后可获得个性化建议"><i class="fa-solid fa-user-check"></i></span></div><div class="quick-sub">科学运动指导</div>
+        </div>
+        <div class="quick-card" onclick="startVoiceInput()">
+          <div class="quick-icon qc-green"><i class="fa-solid fa-microphone"></i></div>
+          <div class="quick-label">语音输入</div><div class="quick-sub">语音转文字</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg-row ai">
+          <div class="msg-avatar"><i class="fa-solid fa-staff-snake"></i></div>
+          <div class="msg-bubble">
+            您好！我是您的医疗健康助手。<br>请问有什么可以帮助您的？我会尽力为您提供健康科普和就医指引。
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleChatImage(event)">
+        <div class="input-wrap">
+          <button class="input-action" onclick="document.getElementById('imgInput').click()" title="发送图片">
+            <i class="fa-solid fa-image"></i>
+          </button>
+          <input type="text" class="chat-input" id="msgInput" placeholder="请输入您的问题..." autofocus>
+          <button class="input-action" onclick="clearInput()">
+            <i class="fa-solid fa-delete-left"></i>
+          </button>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Panel -->
+  <div class="panel" id="servicesPanel">
+    <div class="disclaimer">
+      <i class="fa-solid fa-shield-halved" style="margin-top:2px"></i>
+      <span>服务管理模块提供就医指引和生活方式科普，不替代真实医疗服务。所有建议均为科普性质。</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-stethoscope"></i>就医管理</div>
+      <div class="card-body">
+        <div class="service-grid">
+          <div class="service-card" onclick="location.href='map.html'">
+            <div class="service-card-icon qc-blue"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="service-card-title">找医院</div>
+            <div class="service-card-desc">在地图上查看附近医院位置和科室信息</div>
+          </div>
+          <div class="service-card" onclick="switchPanel('chat')">
+            <div class="service-card-icon qc-green"><i class="fa-solid fa-message-medical"></i></div>
+            <div class="service-card-title">在线咨询</div>
+            <div class="service-card-desc">返回聊天界面，医疗知识问答和智能分诊</div>
+          </div>
+          <div class="service-card" onclick="location.href='report.html'">
+            <div class="service-card-icon qc-green"><i class="fa-solid fa-clipboard-list"></i></div>
+            <div class="service-card-title">看报告</div>
+            <div class="service-card-desc">上传体检报告、化验单，获取客观数据转录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-heart"></i>生活方式管理</div>
+      <div class="card-body">
+        <div class="service-grid">
+          <div class="service-card" onclick="openLifestyleModal('饮食')">
+            <div class="service-card-icon qc-amber"><i class="fa-solid fa-apple-whole"></i></div>
+            <div class="service-card-title">饮食管理 <span class="login-recommend" title="登录后可获得个性化建议"><i class="fa-solid fa-user-check"></i></span></div><div class="service-card-desc">均衡膳食建议和日常饮食科普</div>
+          </div>
+          <div class="service-card" onclick="openLifestyleModal('运动')">
+            <div class="service-card-icon qc-blue"><i class="fa-solid fa-dumbbell"></i></div>
+            <div class="service-card-title">运动管理 <span class="login-recommend" title="登录后可获得个性化建议"><i class="fa-solid fa-user-check"></i></span></div><div class="service-card-desc">科学运动和健身指导建议</div>
+          </div>
+          <div class="service-card" onclick="openLifestyleModal('睡眠')">
+            <div class="service-card-icon qc-green"><i class="fa-solid fa-moon"></i></div>
+            <div class="service-card-title">睡眠管理 <span class="login-recommend" title="登录后可获得个性化建议"><i class="fa-solid fa-user-check"></i></span></div><div class="service-card-desc">改善睡眠质量的实用建议</div>
+          </div>
+          <div class="service-card" onclick="openLifestyleModal('心理')">
+            <div class="service-card-icon qc-blue"><i class="fa-solid fa-brain"></i></div>
+            <div class="service-card-title">心理调适</div><div class="service-card-desc">压力和情绪管理基本方法</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-capsules"></i>用药管理</div>
+      <div class="card-body">
+        <div class="service-grid">
+          <div class="service-card" onclick="openMedicationModal()">
+            <div class="service-card-icon qc-red"><i class="fa-solid fa-book-medical"></i></div>
+            <div class="service-card-title">查用药</div><div class="service-card-desc">药品基础信息科普查询，严禁用药指导</div>
+          </div>
+          <div class="service-card" onclick="openTcmModal()">
+            <div class="service-card-icon qc-green"><i class="fa-solid fa-leaf"></i></div>
+            <div class="service-card-title">看中医</div><div class="service-card-desc">中医药文化和养生理念科普</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Generic Modal -->
+<div class="modal-overlay" id="genericModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">功能</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="modalBody"></div>
+    <div id="modalResponse" class="modal-response" style="display:none"></div>
+  </div>
+</div>
+
+  </div><!-- .main-area -->
+</div><!-- .main-layout -->
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/chat.js"></script>
+<script>
+  // Theme icon refresh
+  (() => {
+    const icon = document.getElementById('themeIcon');
+    const update = () => { icon.className = getTheme() === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'; };
+    update();
+    const orig = toggleTheme;
+    toggleTheme = () => { const t = orig(); update(); return t; };
+    document.getElementById('msgInput').focus();
+  })();
+</script>
+</body>
+</html>

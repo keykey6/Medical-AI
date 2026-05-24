@@ -1,0 +1,87 @@
+{
+  "name": "医疗健康助手",
+  "short_name": "医疗助手",
+  "description": "AI驱动的医疗健康助手，提供健康咨询、报告解读、健康档案管理等服务",
+  "start_url": "/static/index.html",
+  "display": "standalone",
+  "background_color": "#1a1f2e",
+  "theme_color": "#1a1f2e",
+  "orientation": "portrait",
+  "scope": "/static/",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/static/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "utilities"],
+  "screenshots": [
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "在线咨询",
+      "short_name": "咨询",
+      "description": "快速开始健康咨询",
+      "url": "/static/index.html#chat",
+      "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "健康档案",
+      "short_name": "档案",
+      "description": "查看健康档案",
+      "url": "/static/index.html#profile",
+      "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>地图找医院 — Noir Medical</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/common.css">
+  <link rel="stylesheet" href="/static/css/map.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+    地图找医院
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" style="color:white;background:rgba(255,255,255,0.12)" onclick="location.href='index.html'">
+      <i class="fa-solid fa-arrow-left"></i> 返回
+    </button>
+    <button class="btn-icon" onclick="toggleTheme();drawMap()" title="切换主题">
+      <i class="fa-solid fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+</div>
+
+<div class="map-layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="section-block">
+      <div class="section-title"><i class="fa-solid fa-location-crosshairs"></i>当前位置</div>
+      <div class="location-row">
+        <div class="location-info">
+          <div class="location-label">定位状态</div>
+          <div id="locationText">点击右侧按钮获取位置</div>
+        </div>
+        <button class="btn-locate" onclick="getUserLocation()">
+          <i class="fa-solid fa-map-pin"></i> 定位
+        </button>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-title"><i class="fa-solid fa-filter"></i>筛选条件</div>
+      <div class="filter-row">
+        <select id="departmentSelect" class="filter-select"><option value="">全部科室</option></select>
+        <select id="levelSelect" class="filter-select"><option value="">全部等级</option></select>
+        <select id="citySelect" class="filter-select"><option value="">全部城市</option></select>
+      </div>
+      <div class="search-row">
+        <input type="text" id="keywordInput" class="search-input" placeholder="搜索医院名称或科室...">
+        <button class="btn-search" onclick="doSearch()"><i class="fa-solid fa-search"></i> 搜索</button>
+      </div>
+    </div>
+
+    <div class="section-block" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="section-title">
+        <i class="fa-solid fa-hospital"></i>搜索结果 (<span id="resultCount">0</span>)
+      </div>
+      <div id="hospitalList" class="hospital-list">
+        <div class="empty-state"><i class="fa-solid fa-hospital empty-icon"></i><p>请选择筛选条件或搜索医院</p></div>
+      </div>
+    </div>
+
+    <div class="disclaimer" style="font-size:11px">
+      <strong>【重要说明】</strong>本页面信息仅供参考，就医请咨询专业医生并确认机构资质。
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-area">
+    <div id="mapContainer" style="width:100%;height:100%"></div>
+
+    <!-- Legend -->
+    <div class="map-legend">
+      <span><span class="legend-dot legend-user"></span>我的位置</span>
+      <span><span class="legend-dot legend-hosp"></span>医院位置</span>
+    </div>
+
+    <!-- Disclaimer overlay -->
+    <div class="map-disclaimer">
+      <strong>重要说明</strong>：医院信息来源于公开数据，仅供参考。不构成推荐或评价。
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/map.js"></script>
+</body>
+</html>
